@@ -2,7 +2,7 @@ package com.wish.api;
 
 import com.wish.API;
 import java.util.UUID;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 public class DatabaseManager {
@@ -12,14 +12,20 @@ public class DatabaseManager {
 
     public DatabaseManager(API plugin) {
         this.plugin = plugin;
-        this.violations = new HashMap<>();
+        // Usando ConcurrentHashMap para mejor thread-safety en versiones antiguas
+        this.violations = new ConcurrentHashMap<>();
     }
 
     public void addViolation(UUID playerUUID, String checkName) {
-        violations.merge(playerUUID, 1, Integer::sum);
+        int current = violations.getOrDefault(playerUUID, 0);
+        violations.put(playerUUID, current + 1);
     }
 
     public int getViolations(UUID playerUUID) {
         return violations.getOrDefault(playerUUID, 0);
+    }
+
+    public void clearViolations(UUID playerUUID) {
+        violations.remove(playerUUID);
     }
 }

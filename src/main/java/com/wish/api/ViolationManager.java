@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ViolationManager {
 
@@ -13,15 +14,26 @@ public class ViolationManager {
 
     public ViolationManager(API plugin) {
         this.plugin = plugin;
-        this.checkViolations = new HashMap<>();
+        // Usando ConcurrentHashMap para mejor thread-safety en versiones antiguas
+        this.checkViolations = new ConcurrentHashMap<>();
     }
 
     public void addViolation(Player player, String checkName) {
         UUID uuid = player.getUniqueId();
-        checkViolations.computeIfAbsent(uuid, k -> new HashMap<>());
-        Map<String, Integer> playerViolations = checkViolations.get(uuid);
 
-        int violations = playerViolations.getOrDefault(checkName, 0) + 1;
+        // Método más compatible para manejar el mapa de violaciones
+        if (!checkViolations.containsKey(uuid)) {
+            checkViolations.put(uuid, new HashMap<>());
+        }
+
+        Map<String, Integer> playerViolations = checkViolations.get(uuid);
+        int violations = 0;
+
+        if (playerViolations.containsKey(checkName)) {
+            violations = playerViolations.get(checkName);
+        }
+
+        violations++;
         playerViolations.put(checkName, violations);
 
         // Notificar mediante AlertManager
@@ -32,8 +44,16 @@ public class ViolationManager {
     }
 
     public int getViolations(Player player, String checkName) {
-        return checkViolations
-                .getOrDefault(player.getUniqueId(), new HashMap<>())
-                .getOrDefault(checkName, 0);
+        UUID uuid = player.getUniqueId();
+        if (!checkViolations.containsKey(uuid)) {
+            return 0;
+        }
+
+        Map<String, Integer> playerViolations = checkViolations.get(uuid);
+        return playerViolations.getOrDefault(checkName, 0);
+    }
+
+    public void clearViolations(UUID uuid) {
+        checkViolations.remove(uuid);
     }
 }
