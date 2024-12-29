@@ -19,3 +19,15 @@ database:
     database: "anticheat"
     username: "root"
     password: ""
+
+# Ping Settings
+ping:
+  enabled: true
+  max-ping: 500
+  check-interval: 5 # en segundos
+  actions:
+    kick: true
+    kick-message: "&cHas sido expulsado por ping alto\n&fPing máximo permitido: &e{max-ping}ms\n&fTu ping: &e{ping}ms"
+    notify-staff: true
+    command: "" # comando opcional para ejecutar (dejar vacío para deshabilitar)
+  bypass-permission: "slimac.ping.bypass"

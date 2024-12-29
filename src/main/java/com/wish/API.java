@@ -1,5 +1,6 @@
 package com.wish;
 
+import com.wish.api.PingManager;
 import com.wish.commands.AlertsCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
@@ -15,6 +16,7 @@ public class API extends JavaPlugin implements Listener {
     private AlertManager alertManager;
     private DatabaseManager databaseManager;
     private ViolationManager violationManager;
+    private PingManager pingManager;
 
     @Override
     public void onEnable() {
@@ -24,6 +26,7 @@ public class API extends JavaPlugin implements Listener {
         this.alertManager = new AlertManager(this);
         this.databaseManager = new DatabaseManager(this);
         this.violationManager = new ViolationManager(this);
+        this.pingManager = new PingManager(this);
 
         // Registrar eventos
         getServer().getPluginManager().registerEvents(this, this);
@@ -42,6 +45,9 @@ public class API extends JavaPlugin implements Listener {
         if (databaseManager != null) {
             databaseManager.shutdown();
         }
+        if (pingManager != null) {
+            pingManager.stopPingCheck();
+        }
         getLogger().info("SlimAPI has been disabled!");
     }
 
@@ -51,6 +57,10 @@ public class API extends JavaPlugin implements Listener {
             violationManager.clearViolations(event.getPlayer().getUniqueId());
             databaseManager.clearViolations(event.getPlayer().getUniqueId());
         }
+    }
+
+    public PingManager getPingManager() {
+        return pingManager;
     }
 
     public static API getInstance() {
