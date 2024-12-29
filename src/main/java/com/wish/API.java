@@ -4,6 +4,7 @@ import com.wish.api.*;
 import com.wish.api.events.SlimAPIReloadEvent;
 import com.wish.commands.AlertsCommand;
 import com.wish.commands.SlimAPICommand;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,6 +23,19 @@ public class API extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
+        // Mostrar ASCII art
+        getServer().getConsoleSender().sendMessage(ChatColor.RED + "\n" +
+                "███████╗██╗     ██╗███╗   ███╗ █████╗ ██████╗ ██╗\n" +
+                "██╔════╝██║     ██║████╗ ████║██╔══██╗██╔══██╗██║\n" +
+                "███████╗██║     ██║██╔████╔██║███████║██████╔╝██║\n" +
+                "╚════██║██║     ██║██║╚██╔╝██║██╔══██║██╔═══╝ ██║\n" +
+                "███████║███████╗██║██║ ╚═╝ ██║██║  ██║██║     ██║\n" +
+                "╚══════╝╚══════╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝\n");
+
+        getServer().getConsoleSender().sendMessage(ChatColor.GRAY + "Version: " + ChatColor.RED + getDescription().getVersion());
+        getServer().getConsoleSender().sendMessage(ChatColor.GRAY + "Author: " + ChatColor.RED + "wwishh");
+        getServer().getConsoleSender().sendMessage("");
+
         // Inicializar managers
         this.alertManager = new AlertManager(this);
         this.databaseManager = new DatabaseManager(this);
@@ -39,7 +53,7 @@ public class API extends JavaPlugin implements Listener {
         // Cargar configuración
         saveDefaultConfig();
 
-        getLogger().info("SlimAPI has been enabled!");
+        getLogger().info("SlimAPI has been enabled! by wwishh <3");
     }
 
     @Override
@@ -53,7 +67,7 @@ public class API extends JavaPlugin implements Listener {
         if (pingCompensationManager != null) {
             pingCompensationManager.shutdown();
         }
-        getLogger().info("SlimAPI has been disabled!");
+        getLogger().info("SlimAPI has been disabled! by wwishh <3");
     }
 
     private void initializeManagers() {

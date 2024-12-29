@@ -1,7 +1,7 @@
 name: SlimACAPI
 version: '1.0.0'
 main: com.wish.API
-authors: [Wish]
+authors: [wwishh]
 description: API for AntiCheat check plugins
 
 commands:
