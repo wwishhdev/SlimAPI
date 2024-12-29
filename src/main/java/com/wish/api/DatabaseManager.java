@@ -84,8 +84,14 @@ public class DatabaseManager {
 
     public void reload() {
         try {
-            connection.reload();
-            initializeDatabase();
+            // Cerrar la conexión existente
+            if (connection != null) {
+                connection.close();
+            }
+
+            // Reinicializar todo
+            initialize();
+
             plugin.getLogger().info("Base de datos reconfigurada correctamente");
         } catch (Exception e) {
             plugin.getLogger().severe("Error al recargar la base de datos: " + e.getMessage());

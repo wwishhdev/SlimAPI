@@ -74,7 +74,7 @@ public class DatabaseConnection {
         if (connection != null) {
             try {
                 connection.close();
-                connection = null; // Importante: establecer a null después de cerrar
+                connection = null;
                 plugin.getLogger().info("Conexión a la base de datos cerrada correctamente");
             } catch (SQLException e) {
                 plugin.getLogger().severe("Error al cerrar la conexión: " + e.getMessage());
