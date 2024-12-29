@@ -36,24 +36,30 @@ public class API extends JavaPlugin implements Listener {
         getServer().getConsoleSender().sendMessage(ChatColor.GRAY + "Author: " + ChatColor.RED + "wwishh");
         getServer().getConsoleSender().sendMessage("");
 
-        // Inicializar managers
-        this.alertManager = new AlertManager(this);
-        this.databaseManager = new DatabaseManager(this);
-        this.violationManager = new ViolationManager(this);
-        this.pingManager = new PingManager(this);
-        this.pingCompensationManager = new PingCompensationManager(this);
-
-        // Registrar eventos
-        getServer().getPluginManager().registerEvents(this, this);
-
-        // Registrar comandos
-        getCommand("alerts").setExecutor(new AlertsCommand(this));
-        getCommand("slimapi").setExecutor(new SlimAPICommand(this));
-
         // Cargar configuración
         saveDefaultConfig();
 
-        getLogger().info("SlimAPI has been enabled! by wwishh <3");
+        try {
+            // Inicializar managers
+            this.alertManager = new AlertManager(this);
+            this.databaseManager = new DatabaseManager(this);
+            this.violationManager = new ViolationManager(this);
+            this.pingManager = new PingManager(this);
+            this.pingCompensationManager = new PingCompensationManager(this);
+
+            // Registrar eventos
+            getServer().getPluginManager().registerEvents(this, this);
+
+            // Registrar comandos
+            getCommand("alerts").setExecutor(new AlertsCommand(this));
+            getCommand("slimapi").setExecutor(new SlimAPICommand(this));
+
+            getLogger().info("SlimAPI has been enabled! by wwishh <3");
+        } catch (Exception e) {
+            getLogger().severe("Error initializing SlimAPI: " + e.getMessage());
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
 
     @Override

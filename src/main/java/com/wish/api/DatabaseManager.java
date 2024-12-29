@@ -2,7 +2,6 @@ package com.wish.api;
 
 import com.wish.API;
 import com.wish.api.database.DatabaseConnection;
-import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,37 +15,74 @@ public class DatabaseManager {
 
     private final API plugin;
     private final DatabaseConnection database;
+    private final DatabaseConnection connection;
     private final Map<UUID, Integer> cachedViolations;
 
     public DatabaseManager(API plugin) {
         this.plugin = plugin;
         this.database = new DatabaseConnection(plugin);
+        this.connection = new DatabaseConnection(plugin);
         this.cachedViolations = new ConcurrentHashMap<>();
         initializeDatabase();
     }
 
     private void initializeDatabase() {
-        try (Connection conn = database.getConnection()) {
-            // Tabla para violaciones
-            String violations = "CREATE TABLE IF NOT EXISTS violations ("
-                    + "id INTEGER PRIMARY KEY " + (plugin.getConfig().getString("database.type", "sqlite").equalsIgnoreCase("mysql") ? "AUTO_INCREMENT" : "AUTOINCREMENT") + ","
-                    + "uuid VARCHAR(36) NOT NULL,"
-                    + "check_name VARCHAR(32) NOT NULL,"
-                    + "violations INT NOT NULL,"
-                    + "last_violation TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
-                    + ");";
+        try {
+            // Crear tablas
+            try (Connection conn = connection.getConnection()) {
+                // Tabla para alertas
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS alerts_status (" +
+                                "player_uuid VARCHAR(36) PRIMARY KEY, " +
+                                "alerts_enabled BOOLEAN DEFAULT false)"
+                );
 
-            // Tabla para alertas
-            String alerts = "CREATE TABLE IF NOT EXISTS alerts_enabled ("
-                    + "uuid VARCHAR(36) PRIMARY KEY,"
-                    + "enabled BOOLEAN NOT NULL DEFAULT TRUE"
-                    + ");";
+                // Tabla para violaciones
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS violations (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "player_uuid VARCHAR(36), " +
+                                "check_name VARCHAR(50), " +
+                                "vl INTEGER, " +
+                                "timestamp BIGINT)"
+                );
 
-            conn.createStatement().execute(violations);
-            conn.createStatement().execute(alerts);
-
+                plugin.getLogger().info("Base de datos " +
+                        (plugin.getConfig().getString("database.type", "sqlite").equalsIgnoreCase("mysql") ? "MySQL" : "SQLite") +
+                        " inicializada correctamente!");
+            }
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al inicializar la base de datos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public boolean updateAlertsStatus(UUID playerUUID, boolean enabled) {
+        try (Connection conn = connection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT OR REPLACE INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?)"
+            );
+            stmt.setString(1, playerUUID.toString());
+            stmt.setBoolean(2, enabled);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error al actualizar estado de alertas: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean getAlertsStatus(UUID playerUUID) {
+        try (Connection conn = connection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT alerts_enabled FROM alerts_status WHERE player_uuid = ?"
+            );
+            stmt.setString(1, playerUUID.toString());
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean("alerts_enabled");
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error al obtener estado de alertas: " + e.getMessage());
+            return false;
         }
     }
 
