@@ -1,0 +1,21 @@
+# SlimACAPI Configuration
+
+# Alert Settings
+alerts:
+  enabled: true
+  permission: "slimac.alerts"
+
+# Violation Settings
+violations:
+  reset-on-disconnect: true
+  max-violations: 20
+
+# Database Settings
+database:
+  type: "sqlite" # sqlite/mysql
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "anticheat"
+    username: "root"
+    password: ""
