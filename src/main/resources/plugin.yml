@@ -1,4 +1,4 @@
-name: SlimACAPI
+name: SlimAPI
 version: '1.0.0'
 main: com.wish.API
 authors: [wwishh]

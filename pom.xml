@@ -7,6 +7,7 @@
     <groupId>com.wish</groupId>
     <artifactId>SlimAPI</artifactId>
     <version>1.0.0-W</version>
+    <description>API for AntiCheat check plugins</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
