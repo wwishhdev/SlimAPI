@@ -13,17 +13,19 @@ import java.util.Map;
 
 public class DatabaseManager {
     private final API plugin;
-    private final DatabaseConnection database;
-    private final DatabaseConnection connection;
-    private final boolean isMySQL;
+    private DatabaseConnection connection;
+    private boolean isMySQL;
     private final Map<UUID, Integer> cachedViolations;
 
     public DatabaseManager(API plugin) {
         this.plugin = plugin;
-        this.database = new DatabaseConnection(plugin);
+        this.cachedViolations = new ConcurrentHashMap<>();
+        initialize();
+    }
+
+    private void initialize() {
         this.isMySQL = plugin.getConfig().getString("database.type", "sqlite").equalsIgnoreCase("mysql");
         this.connection = new DatabaseConnection(plugin);
-        this.cachedViolations = new ConcurrentHashMap<>();
         initializeDatabase();
     }
 
@@ -144,18 +146,27 @@ public class DatabaseManager {
     }
 
     public void addViolation(UUID playerUUID, String checkName) {
-        try (Connection conn = database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO violations (uuid, check_name, violations) VALUES (?, ?, 1) "
-                             + "ON DUPLICATE KEY UPDATE violations = violations + 1, last_violation = CURRENT_TIMESTAMP")) {
+        try (Connection conn = connection.getConnection()) {
+            String sql;
+            if (isMySQL) {
+                sql = "INSERT INTO violations (player_uuid, check_name, vl, timestamp) VALUES (?, ?, 1, ?) " +
+                        "ON DUPLICATE KEY UPDATE vl = vl + 1, timestamp = ?";
+            } else {
+                sql = "INSERT INTO violations (player_uuid, check_name, vl, timestamp) VALUES (?, ?, 1, ?)";
+            }
 
+            long timestamp = System.currentTimeMillis();
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, playerUUID.toString());
             ps.setString(2, checkName);
+            ps.setLong(3, timestamp);
+            if (isMySQL) {
+                ps.setLong(4, timestamp);
+            }
             ps.executeUpdate();
 
             // Actualizar caché
             cachedViolations.merge(playerUUID, 1, Integer::sum);
-
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al añadir violación: " + e.getMessage());
         }
@@ -163,9 +174,9 @@ public class DatabaseManager {
 
     public int getViolations(UUID playerUUID) {
         return cachedViolations.computeIfAbsent(playerUUID, uuid -> {
-            try (Connection conn = database.getConnection();
+            try (Connection conn = connection.getConnection();
                  PreparedStatement ps = conn.prepareStatement(
-                         "SELECT SUM(violations) FROM violations WHERE uuid = ?")) {
+                         "SELECT SUM(vl) FROM violations WHERE player_uuid = ?")) {
 
                 ps.setString(1, uuid.toString());
                 ResultSet rs = ps.executeQuery();
@@ -173,7 +184,6 @@ public class DatabaseManager {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
-
             } catch (SQLException e) {
                 plugin.getLogger().severe("Error al obtener violaciones: " + e.getMessage());
             }
@@ -188,42 +198,50 @@ public class DatabaseManager {
             );
             stmt.setString(1, playerUUID.toString());
             stmt.executeUpdate();
+
+            // Limpiar caché
+            cachedViolations.remove(playerUUID);
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al limpiar violaciones: " + e.getMessage());
         }
     }
 
     public void setAlertsEnabled(UUID playerUUID, boolean enabled) {
-        try (Connection conn = database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO alerts_enabled (uuid, enabled) VALUES (?, ?) "
-                             + "ON DUPLICATE KEY UPDATE enabled = ?")) {
+        try (Connection conn = connection.getConnection()) {
+            String sql;
+            if (isMySQL) {
+                sql = "INSERT INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?) " +
+                        "ON DUPLICATE KEY UPDATE alerts_enabled = ?";
+            } else {
+                sql = "INSERT OR REPLACE INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?)";
+            }
 
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, playerUUID.toString());
             ps.setBoolean(2, enabled);
-            ps.setBoolean(3, enabled);
+            if (isMySQL) {
+                ps.setBoolean(3, enabled);
+            }
             ps.executeUpdate();
-
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al actualizar estado de alertas: " + e.getMessage());
         }
     }
 
     public boolean areAlertsEnabled(UUID playerUUID) {
-        try (Connection conn = database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT enabled FROM alerts_enabled WHERE uuid = ?")) {
-
+        try (Connection conn = connection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT alerts_enabled FROM alerts_status WHERE player_uuid = ?"
+            );
             ps.setString(1, playerUUID.toString());
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return rs.getBoolean("enabled");
+                return rs.getBoolean("alerts_enabled");
             }
 
             // Por defecto, las alertas están activadas
             return true;
-
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al obtener estado de alertas: " + e.getMessage());
             return true;
