@@ -1,6 +1,7 @@
 package com.wish.commands;
 
 import com.wish.API;
+import com.wish.api.DatabaseManager;
 import com.wish.api.database.DatabaseConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -60,9 +61,10 @@ public class SlimAPICommand implements CommandExecutor, TabCompleter {
     private void reloadAll(CommandSender sender) {
         try {
             plugin.reloadManagers();
+            DatabaseManager dbManager = plugin.getDatabaseManager();
 
             // Verificar la conexión después de recargar
-            if (plugin.getDatabaseManager().getConnection().testConnection()) {
+            if (dbManager.testConnection()) { // Cambiamos esto
                 sender.sendMessage(ChatColor.GREEN + "Configuración recargada correctamente.");
                 sender.sendMessage(ChatColor.GREEN + "Conexión a la base de datos establecida.");
 

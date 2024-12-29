@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 public class DatabaseManager {
-
     private final API plugin;
     private final DatabaseConnection database;
     private final DatabaseConnection connection;
@@ -96,15 +95,30 @@ public class DatabaseManager {
 
     public boolean updateAlertsStatus(UUID playerUUID, boolean enabled) {
         try (Connection conn = connection.getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT OR REPLACE INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?)"
-            );
+            String sql;
+            if (isMySQL) {
+                sql = "INSERT INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?) " +
+                        "ON DUPLICATE KEY UPDATE alerts_enabled = VALUES(alerts_enabled)";
+            } else {
+                sql = "INSERT OR REPLACE INTO alerts_status (player_uuid, alerts_enabled) VALUES (?, ?)";
+            }
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerUUID.toString());
             stmt.setBoolean(2, enabled);
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al actualizar estado de alertas: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean testConnection() {
+        try (Connection conn = connection.getConnection()) {
+            return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error al probar la conexión: " + e.getMessage());
             return false;
         }
     }
