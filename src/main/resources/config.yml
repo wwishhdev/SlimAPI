@@ -1,18 +1,46 @@
+#  _____ _ _            _____ _____ _____
+# |   __| |_|___ ___   |  _  |     |  _  |
+# |__   | | |  _|   |  |     |  |  |   __|
+# |_____|_|_|_| |_|_|  |__|__|_____|__|
+#
 # SlimACAPI Configuration
+# Version: 1.0.0
+# Author: Wish
 
-# Alert Settings
+# ===========================================
+# Alert System Configuration
+# ===========================================
 alerts:
+  # Enable or disable the alert system
+  # When enabled, staff members will receive notifications about potential violations
   enabled: true
+  # Permission required to receive and manage alerts
   permission: "slimac.alerts"
 
-# Violation Settings
+# ===========================================
+# Violation Management
+# ===========================================
 violations:
+  # Whether to reset violations when a player disconnects
+  # true: Violations are cleared on disconnect
+  # false: Violations persist between sessions
   reset-on-disconnect: true
+  # Maximum violations before taking action
+  # Increase this value if you experience false positives
   max-violations: 20
 
-# Database Settings
+# ===========================================
+# Database Configuration
+# ===========================================
 database:
-  type: "sqlite" # sqlite/mysql
+  # Database type to use
+  # Options: "sqlite" or "mysql"
+  # SQLite: Lightweight, file-based database (recommended for small servers)
+  # MySQL: Better for larger servers or server networks
+  type: "sqlite"
+
+  # MySQL Configuration
+  # Only used if type is set to "mysql"
   mysql:
     host: "localhost"
     port: 3306
@@ -20,30 +48,62 @@ database:
     username: "root"
     password: ""
 
-# Ping Settings
+# ===========================================
+# Ping Management
+# ===========================================
 ping:
+  # Enable or disable ping checking
   enabled: true
+  # Maximum allowed ping in milliseconds
+  # Players exceeding this will trigger defined actions
   max-ping: 500
-  check-interval: 5 # en segundos
+  # How often to check player ping (in seconds)
+  check-interval: 5
+
+  # Actions to take when ping exceeds limit
   actions:
+    # Whether to kick players with high ping
     kick: true
-    kick-message: "&cHas sido expulsado por ping alto\n&fPing máximo permitido: &e{max-ping}ms\n&fTu ping: &e{ping}ms"
+    # Kick message (supports color codes)
+    # Variables: {max-ping}, {ping}
+    kick-message: "&cKicked for High Ping\n&fMaximum allowed: &e{max-ping}ms\n&fYour ping: &e{ping}ms"
+    # Notify staff members about high ping
     notify-staff: true
-    command: "" # comando opcional para ejecutar (dejar vacío para deshabilitar)
+    # Optional command to execute
+    # Variables: {player}, {ping}, {max-ping}
+    # Leave empty to disable
+    command: ""
+
+  # Permission to bypass ping checks
   bypass-permission: "slimac.ping.bypass"
 
-# Ping Compensation Settings
+# ===========================================
+# Ping Compensation System
+# ===========================================
 ping-compensation:
+  # Enable or disable ping compensation
   enabled: true
-  # Máximo de compensación en milisegundos
+  # Maximum compensation in milliseconds
+  # Prevents excessive compensation for very high ping
   max-compensation: 150
-  # Modo de compensación (ADAPTIVE, FIXED)
+
+  # Compensation mode
+  # ADAPTIVE: Dynamically adjusts based on ping history
+  # FIXED: Uses current ping value directly
   mode: "ADAPTIVE"
-  # Factor de compensación (1.0 = compensación completa, 0.5 = media compensación)
+
+  # Compensation factor (0.0 to 1.0)
+  # 1.0: Full compensation
+  # 0.5: Half compensation
+  # 0.0: No compensation
   compensation-factor: 0.75
-  # Historial de pings a mantener para cálculos
+
+  # Number of ping values to keep in history
+  # Used for adaptive compensation calculations
   history-size: 20
-  # Intervalo de actualización en ticks
+
+  # Update interval in server ticks (20 ticks = 1 second)
   update-interval: 1
-  # Debug mode
+
+  # Enable detailed debug logging
   debug: false
