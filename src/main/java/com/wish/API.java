@@ -1,5 +1,6 @@
 package com.wish;
 
+import com.wish.commands.AlertsCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,15 +28,18 @@ public class API extends JavaPlugin implements Listener {
         // Registrar eventos
         getServer().getPluginManager().registerEvents(this, this);
 
+        // Registrar comandos
+        getCommand("alerts").setExecutor(new AlertsCommand(this));
+
         // Cargar configuración
         saveDefaultConfig();
 
-        getLogger().info("SlimACAPI has been enabled!");
+        getLogger().info("SlimAPI has been enabled!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("SlimACAPI has been disabled!");
+        getLogger().info("SlimAPI has been disabled!");
     }
 
     @EventHandler
