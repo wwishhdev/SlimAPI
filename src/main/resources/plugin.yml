@@ -9,6 +9,10 @@ commands:
     description: Activa/desactiva las alertas del anticheat
     usage: /alerts
     permission: slimac.alerts
+  slimapi:
+    description: Comandos administrativos del anticheat
+    usage: /slimapi reload
+    permission: slimac.admin
 
 permissions:
   slimac.alerts:
