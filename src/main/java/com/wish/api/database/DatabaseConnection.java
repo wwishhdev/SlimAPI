@@ -59,6 +59,11 @@ public class DatabaseConnection {
             }
             connection = DriverManager.getConnection(connectionUrl, username, password);
         } else {
+            try {
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("SQLite driver not found", e);
+            }
             connection = DriverManager.getConnection(connectionUrl);
         }
 

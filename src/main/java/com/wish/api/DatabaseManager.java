@@ -29,54 +29,49 @@ public class DatabaseManager {
     }
 
     private void initializeDatabase() {
-        try {
-            try (Connection conn = connection.getConnection()) {
-                // Crear tabla de alertas con sintaxis específica para cada DB
-                if (isMySQL) {
-                    conn.createStatement().execute(
-                            "CREATE TABLE IF NOT EXISTS alerts_status (" +
-                                    "player_uuid VARCHAR(36) PRIMARY KEY, " +
-                                    "alerts_enabled BOOLEAN DEFAULT false) " +
-                                    "ENGINE=InnoDB"
-                    );
+        try (Connection conn = connection.getConnection()) {
+            if (isMySQL) {
+                // Sintaxis MySQL
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS alerts_status (" +
+                                "player_uuid VARCHAR(36) PRIMARY KEY, " +
+                                "alerts_enabled BOOLEAN DEFAULT false) " +
+                                "ENGINE=InnoDB"
+                );
 
-                    conn.createStatement().execute(
-                            "CREATE TABLE IF NOT EXISTS violations (" +
-                                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                    "player_uuid VARCHAR(36), " +
-                                    "check_name VARCHAR(50), " +
-                                    "vl INT, " +
-                                    "timestamp BIGINT, " +
-                                    "INDEX idx_player (player_uuid)) " +
-                                    "ENGINE=InnoDB"
-                    );
-                } else {
-                    // SQLite syntax
-                    conn.createStatement().execute(
-                            "CREATE TABLE IF NOT EXISTS alerts_status (" +
-                                    "player_uuid VARCHAR(36) PRIMARY KEY, " +
-                                    "alerts_enabled BOOLEAN DEFAULT 0)"
-                    );
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS violations (" +
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "player_uuid VARCHAR(36), " +
+                                "check_name VARCHAR(50), " +
+                                "vl INT, " +
+                                "timestamp BIGINT, " +
+                                "INDEX idx_player (player_uuid)) " +
+                                "ENGINE=InnoDB"
+                );
+            } else {
+                // Sintaxis SQLite
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS alerts_status (" +
+                                "player_uuid VARCHAR(36) PRIMARY KEY, " +
+                                "alerts_enabled BOOLEAN DEFAULT 0)"
+                );
 
-                    conn.createStatement().execute(
-                            "CREATE TABLE IF NOT EXISTS violations (" +
-                                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                    "player_uuid VARCHAR(36), " +
-                                    "check_name VARCHAR(50), " +
-                                    "vl INTEGER, " +
-                                    "timestamp INTEGER)"
-                    );
-                }
-
-                plugin.getLogger().info("Base de datos " +
-                        (isMySQL ? "MySQL" : "SQLite") +
-                        " inicializada correctamente!");
+                conn.createStatement().execute(
+                        "CREATE TABLE IF NOT EXISTS violations (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "player_uuid VARCHAR(36), " +
+                                "check_name VARCHAR(50), " +
+                                "vl INTEGER, " +
+                                "timestamp INTEGER)"
+                );
             }
+
+            plugin.getLogger().info("Base de datos " +
+                    (isMySQL ? "MySQL" : "SQLite") +
+                    " inicializada correctamente!");
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al inicializar la base de datos: " + e.getMessage());
-            if (e.getMessage().contains("Access denied")) {
-                plugin.getLogger().severe("Verifica las credenciales de MySQL en config.yml");
-            }
             if (isMySQL) {
                 plugin.getLogger().severe("Configuración MySQL actual:");
                 plugin.getLogger().severe("Host: " + plugin.getConfig().getString("database.mysql.host"));
@@ -84,13 +79,19 @@ public class DatabaseManager {
                 plugin.getLogger().severe("Database: " + plugin.getConfig().getString("database.mysql.database"));
                 plugin.getLogger().severe("Usuario: " + plugin.getConfig().getString("database.mysql.username"));
             }
+            e.printStackTrace();
         }
     }
 
     public void reload() {
-        connection.reload();
-        initializeDatabase();
-        plugin.getLogger().info("Base de datos reconfigurada correctamente");
+        try {
+            connection.reload();
+            initializeDatabase();
+            plugin.getLogger().info("Base de datos reconfigurada correctamente");
+        } catch (Exception e) {
+            plugin.getLogger().severe("Error al recargar la base de datos: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public boolean updateAlertsStatus(UUID playerUUID, boolean enabled) {

@@ -1,6 +1,7 @@
 package com.wish.commands;
 
 import com.wish.API;
+import com.wish.api.database.DatabaseConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -59,21 +60,26 @@ public class SlimAPICommand implements CommandExecutor, TabCompleter {
     private void reloadAll(CommandSender sender) {
         try {
             plugin.reloadManagers();
-            sender.sendMessage(ChatColor.GREEN + "Configuration reloaded successfully.");
 
-            // Mostrar tipo de base de datos actual
-            String dbType = plugin.getConfig().getString("database.type", "sqlite");
-            sender.sendMessage(ChatColor.GRAY + "Tipo de base de datos: " + ChatColor.YELLOW + dbType.toUpperCase());
+            // Verificar la conexión después de recargar
+            if (plugin.getDatabaseManager().getConnection().testConnection()) {
+                sender.sendMessage(ChatColor.GREEN + "Configuración recargada correctamente.");
+                sender.sendMessage(ChatColor.GREEN + "Conexión a la base de datos establecida.");
 
-            if (dbType.equalsIgnoreCase("mysql")) {
-                // Mostrar configuraciones de MySQL
-                sender.sendMessage(ChatColor.GRAY + "Configuración MySQL:");
-                sender.sendMessage(ChatColor.GRAY + "- Host: " + ChatColor.YELLOW +
-                        plugin.getConfig().getString("database.mysql.host"));
-                sender.sendMessage(ChatColor.GRAY + "- Base de datos: " + ChatColor.YELLOW +
-                        plugin.getConfig().getString("database.mysql.database"));
-                sender.sendMessage(ChatColor.GRAY + "- SSL: " + ChatColor.YELLOW +
-                        plugin.getConfig().getBoolean("database.mysql.advanced.useSSL"));
+                String dbType = plugin.getConfig().getString("database.type", "sqlite");
+                sender.sendMessage(ChatColor.GRAY + "Tipo de base de datos: " + ChatColor.YELLOW + dbType.toUpperCase());
+
+                if (dbType.equalsIgnoreCase("mysql")) {
+                    sender.sendMessage(ChatColor.GRAY + "Configuración MySQL:");
+                    sender.sendMessage(ChatColor.GRAY + "- Host: " + ChatColor.YELLOW +
+                            plugin.getConfig().getString("database.mysql.host"));
+                    sender.sendMessage(ChatColor.GRAY + "- Base de datos: " + ChatColor.YELLOW +
+                            plugin.getConfig().getString("database.mysql.database"));
+                    sender.sendMessage(ChatColor.GRAY + "- SSL: " + ChatColor.YELLOW +
+                            plugin.getConfig().getBoolean("database.mysql.advanced.useSSL"));
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "Error: No se pudo establecer la conexión con la base de datos.");
             }
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Error al recargar la configuración: " + e.getMessage());
