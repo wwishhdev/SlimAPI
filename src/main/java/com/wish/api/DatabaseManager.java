@@ -16,11 +16,13 @@ public class DatabaseManager {
     private final API plugin;
     private final DatabaseConnection database;
     private final DatabaseConnection connection;
+    private final boolean isMySQL;
     private final Map<UUID, Integer> cachedViolations;
 
     public DatabaseManager(API plugin) {
         this.plugin = plugin;
         this.database = new DatabaseConnection(plugin);
+        this.isMySQL = plugin.getConfig().getString("database.type", "sqlite").equalsIgnoreCase("mysql");
         this.connection = new DatabaseConnection(plugin);
         this.cachedViolations = new ConcurrentHashMap<>();
         initializeDatabase();
@@ -28,32 +30,60 @@ public class DatabaseManager {
 
     private void initializeDatabase() {
         try {
-            // Crear tablas
             try (Connection conn = connection.getConnection()) {
-                // Tabla para alertas
-                conn.createStatement().execute(
-                        "CREATE TABLE IF NOT EXISTS alerts_status (" +
-                                "player_uuid VARCHAR(36) PRIMARY KEY, " +
-                                "alerts_enabled BOOLEAN DEFAULT false)"
-                );
+                // Crear tabla de alertas con sintaxis específica para cada DB
+                if (isMySQL) {
+                    conn.createStatement().execute(
+                            "CREATE TABLE IF NOT EXISTS alerts_status (" +
+                                    "player_uuid VARCHAR(36) PRIMARY KEY, " +
+                                    "alerts_enabled BOOLEAN DEFAULT false) " +
+                                    "ENGINE=InnoDB"
+                    );
 
-                // Tabla para violaciones
-                conn.createStatement().execute(
-                        "CREATE TABLE IF NOT EXISTS violations (" +
-                                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "player_uuid VARCHAR(36), " +
-                                "check_name VARCHAR(50), " +
-                                "vl INTEGER, " +
-                                "timestamp BIGINT)"
-                );
+                    conn.createStatement().execute(
+                            "CREATE TABLE IF NOT EXISTS violations (" +
+                                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                    "player_uuid VARCHAR(36), " +
+                                    "check_name VARCHAR(50), " +
+                                    "vl INT, " +
+                                    "timestamp BIGINT, " +
+                                    "INDEX idx_player (player_uuid)) " +
+                                    "ENGINE=InnoDB"
+                    );
+                } else {
+                    // SQLite syntax
+                    conn.createStatement().execute(
+                            "CREATE TABLE IF NOT EXISTS alerts_status (" +
+                                    "player_uuid VARCHAR(36) PRIMARY KEY, " +
+                                    "alerts_enabled BOOLEAN DEFAULT 0)"
+                    );
+
+                    conn.createStatement().execute(
+                            "CREATE TABLE IF NOT EXISTS violations (" +
+                                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                    "player_uuid VARCHAR(36), " +
+                                    "check_name VARCHAR(50), " +
+                                    "vl INTEGER, " +
+                                    "timestamp INTEGER)"
+                    );
+                }
 
                 plugin.getLogger().info("Base de datos " +
-                        (plugin.getConfig().getString("database.type", "sqlite").equalsIgnoreCase("mysql") ? "MySQL" : "SQLite") +
+                        (isMySQL ? "MySQL" : "SQLite") +
                         " inicializada correctamente!");
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al inicializar la base de datos: " + e.getMessage());
-            e.printStackTrace();
+            if (e.getMessage().contains("Access denied")) {
+                plugin.getLogger().severe("Verifica las credenciales de MySQL en config.yml");
+            }
+            if (isMySQL) {
+                plugin.getLogger().severe("Configuración MySQL actual:");
+                plugin.getLogger().severe("Host: " + plugin.getConfig().getString("database.mysql.host"));
+                plugin.getLogger().severe("Puerto: " + plugin.getConfig().getInt("database.mysql.port"));
+                plugin.getLogger().severe("Database: " + plugin.getConfig().getString("database.mysql.database"));
+                plugin.getLogger().severe("Usuario: " + plugin.getConfig().getString("database.mysql.username"));
+            }
         }
     }
 
@@ -125,16 +155,12 @@ public class DatabaseManager {
     }
 
     public void clearViolations(UUID playerUUID) {
-        try (Connection conn = database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "DELETE FROM violations WHERE uuid = ?")) {
-
-            ps.setString(1, playerUUID.toString());
-            ps.executeUpdate();
-
-            // Limpiar caché
-            cachedViolations.remove(playerUUID);
-
+        try (Connection conn = connection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM violations WHERE player_uuid = ?"
+            );
+            stmt.setString(1, playerUUID.toString());
+            stmt.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al limpiar violaciones: " + e.getMessage());
         }
@@ -178,6 +204,13 @@ public class DatabaseManager {
     }
 
     public void shutdown() {
-        database.close();
+        if (connection != null) {
+            try {
+                connection.close();
+                plugin.getLogger().info("Conexión a la base de datos cerrada correctamente.");
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error al cerrar la conexión de la base de datos: " + e.getMessage());
+            }
+        }
     }
 }

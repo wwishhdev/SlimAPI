@@ -22,29 +22,23 @@ public class DatabaseConnection {
         }
 
         if (type.equalsIgnoreCase("mysql")) {
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("MySQL driver not found: " + e.getMessage());
-                throw new SQLException("MySQL driver not found");
-            }
-
             String host = plugin.getConfig().getString("database.mysql.host");
             int port = plugin.getConfig().getInt("database.mysql.port");
             String database = plugin.getConfig().getString("database.mysql.database");
             String username = plugin.getConfig().getString("database.mysql.username");
             String password = plugin.getConfig().getString("database.mysql.password");
 
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
-            connection = DriverManager.getConnection(url, username, password);
-        } else {
+            String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                    host, port, database);
+
             try {
-                Class.forName("org.sqlite.JDBC");
+                Class.forName("com.mysql.cj.jdbc.Driver");
             } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("SQLite driver not found: " + e.getMessage());
-                throw new SQLException("SQLite driver not found");
+                throw new SQLException("MySQL driver not found", e);
             }
 
+            connection = DriverManager.getConnection(url, username, password);
+        } else {
             File dataFolder = plugin.getDataFolder();
             if (!dataFolder.exists()) {
                 dataFolder.mkdir();
