@@ -71,6 +71,11 @@ database:
     database: "anticheat"
     username: "root"
     password: ""
+    # Advanced connection options
+    advanced:
+      useSSL: false
+      allowPublicKeyRetrieval: true
+      serverTimezone: "UTC"
 
 # ===========================================
 # Ping Management

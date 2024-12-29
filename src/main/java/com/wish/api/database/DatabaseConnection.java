@@ -28,8 +28,13 @@ public class DatabaseConnection {
             String username = plugin.getConfig().getString("database.mysql.username");
             String password = plugin.getConfig().getString("database.mysql.password");
 
-            String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
-                    host, port, database);
+            // Obtener opciones avanzadas de la configuración
+            boolean useSSL = plugin.getConfig().getBoolean("database.mysql.advanced.useSSL", false);
+            boolean allowPublicKeyRetrieval = plugin.getConfig().getBoolean("database.mysql.advanced.allowPublicKeyRetrieval", true);
+            String timezone = plugin.getConfig().getString("database.mysql.advanced.serverTimezone", "UTC");
+
+            String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=%s&allowPublicKeyRetrieval=%s&serverTimezone=%s",
+                    host, port, database, useSSL, allowPublicKeyRetrieval, timezone);
 
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
@@ -40,8 +45,8 @@ public class DatabaseConnection {
             connection = DriverManager.getConnection(url, username, password);
         } else {
             File dataFolder = plugin.getDataFolder();
-            if (!dataFolder.exists()) {
-                dataFolder.mkdir();
+            if (!dataFolder.exists() && !dataFolder.mkdir()) {
+                throw new SQLException("No se pudo crear el directorio de la base de datos");
             }
 
             String url = "jdbc:sqlite:" + new File(dataFolder, "database.db");
