@@ -2,7 +2,6 @@ package com.wish.commands;
 
 import com.wish.API;
 import com.wish.api.DatabaseManager;
-import com.wish.api.database.DatabaseConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
