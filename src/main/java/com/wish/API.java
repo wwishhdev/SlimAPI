@@ -39,6 +39,9 @@ public class API extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (databaseManager != null) {
+            databaseManager.shutdown();
+        }
         getLogger().info("SlimAPI has been disabled!");
     }
 

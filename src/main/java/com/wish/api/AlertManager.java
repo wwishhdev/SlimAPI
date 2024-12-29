@@ -4,18 +4,14 @@ import com.wish.API;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 public class AlertManager {
 
     private final API plugin;
-    private final Set<UUID> alertsEnabled;
 
     public AlertManager(API plugin) {
         this.plugin = plugin;
-        this.alertsEnabled = new HashSet<>();
     }
 
     public void sendAlert(String checkName, Player violator, String details) {
@@ -30,7 +26,8 @@ public class AlertManager {
                 ChatColor.RED + " (" + details + ")";
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.hasPermission("slimac.alerts") && alertsEnabled.contains(player.getUniqueId())) {
+            if (player.hasPermission("slimac.alerts") &&
+                    plugin.getDatabaseManager().areAlertsEnabled(player.getUniqueId())) {
                 player.sendMessage(message);
             }
         }
@@ -38,16 +35,12 @@ public class AlertManager {
 
     public boolean toggleAlerts(Player player) {
         UUID uuid = player.getUniqueId();
-        if (alertsEnabled.contains(uuid)) {
-            alertsEnabled.remove(uuid);
-            return false;
-        } else {
-            alertsEnabled.add(uuid);
-            return true;
-        }
+        boolean newState = !plugin.getDatabaseManager().areAlertsEnabled(uuid);
+        plugin.getDatabaseManager().setAlertsEnabled(uuid, newState);
+        return newState;
     }
 
     public boolean hasAlertsEnabled(Player player) {
-        return alertsEnabled.contains(player.getUniqueId());
+        return plugin.getDatabaseManager().areAlertsEnabled(player.getUniqueId());
     }
 }
