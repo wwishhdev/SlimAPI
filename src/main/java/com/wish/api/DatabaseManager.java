@@ -43,11 +43,11 @@ public class DatabaseManager {
                 conn.createStatement().execute(
                         "CREATE TABLE IF NOT EXISTS violations (" +
                                 "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "player_uuid VARCHAR(36), " +
+                                "player_uuid VARCHAR(36), " +           // Cambiado de uuid a player_uuid
                                 "check_name VARCHAR(50), " +
                                 "vl INT, " +
                                 "timestamp BIGINT, " +
-                                "INDEX idx_player (player_uuid)) " +
+                                "INDEX idx_player (player_uuid)) " +    // Actualizado el índice también
                                 "ENGINE=InnoDB"
                 );
             } else {
@@ -61,7 +61,7 @@ public class DatabaseManager {
                 conn.createStatement().execute(
                         "CREATE TABLE IF NOT EXISTS violations (" +
                                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "player_uuid VARCHAR(36), " +
+                                "player_uuid VARCHAR(36), " +           // Cambiado de uuid a player_uuid
                                 "check_name VARCHAR(50), " +
                                 "vl INTEGER, " +
                                 "timestamp INTEGER)"
@@ -176,7 +176,7 @@ public class DatabaseManager {
         return cachedViolations.computeIfAbsent(playerUUID, uuid -> {
             try (Connection conn = connection.getConnection();
                  PreparedStatement ps = conn.prepareStatement(
-                         "SELECT SUM(vl) FROM violations WHERE player_uuid = ?")) {
+                         "SELECT SUM(vl) FROM violations WHERE player_uuid = ?")) { // Cambiado de uuid a player_uuid
 
                 ps.setString(1, uuid.toString());
                 ResultSet rs = ps.executeQuery();
