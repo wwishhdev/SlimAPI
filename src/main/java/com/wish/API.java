@@ -1,14 +1,11 @@
 package com.wish;
 
-import com.wish.api.PingManager;
+import com.wish.api.*;
 import com.wish.commands.AlertsCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import com.wish.api.AlertManager;
-import com.wish.api.DatabaseManager;
-import com.wish.api.ViolationManager;
 
 public class API extends JavaPlugin implements Listener {
 
@@ -17,6 +14,7 @@ public class API extends JavaPlugin implements Listener {
     private DatabaseManager databaseManager;
     private ViolationManager violationManager;
     private PingManager pingManager;
+    private PingCompensationManager pingCompensationManager;
 
     @Override
     public void onEnable() {
@@ -27,6 +25,7 @@ public class API extends JavaPlugin implements Listener {
         this.databaseManager = new DatabaseManager(this);
         this.violationManager = new ViolationManager(this);
         this.pingManager = new PingManager(this);
+        this.pingCompensationManager = new PingCompensationManager(this);
 
         // Registrar eventos
         getServer().getPluginManager().registerEvents(this, this);
@@ -48,6 +47,9 @@ public class API extends JavaPlugin implements Listener {
         if (pingManager != null) {
             pingManager.stopPingCheck();
         }
+        if (pingCompensationManager != null) {
+            pingCompensationManager.shutdown();
+        }
         getLogger().info("SlimAPI has been disabled!");
     }
 
@@ -57,6 +59,10 @@ public class API extends JavaPlugin implements Listener {
             violationManager.clearViolations(event.getPlayer().getUniqueId());
             databaseManager.clearViolations(event.getPlayer().getUniqueId());
         }
+    }
+
+    public PingCompensationManager getPingCompensationManager() {
+        return pingCompensationManager;
     }
 
     public PingManager getPingManager() {

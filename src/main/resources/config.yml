@@ -31,3 +31,19 @@ ping:
     notify-staff: true
     command: "" # comando opcional para ejecutar (dejar vacío para deshabilitar)
   bypass-permission: "slimac.ping.bypass"
+
+# Ping Compensation Settings
+ping-compensation:
+  enabled: true
+  # Máximo de compensación en milisegundos
+  max-compensation: 150
+  # Modo de compensación (ADAPTIVE, FIXED)
+  mode: "ADAPTIVE"
+  # Factor de compensación (1.0 = compensación completa, 0.5 = media compensación)
+  compensation-factor: 0.75
+  # Historial de pings a mantener para cálculos
+  history-size: 20
+  # Intervalo de actualización en ticks
+  update-interval: 1
+  # Debug mode
+  debug: false
