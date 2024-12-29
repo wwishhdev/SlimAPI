@@ -58,15 +58,26 @@ public class SlimAPICommand implements CommandExecutor, TabCompleter {
 
     private void reloadAll(CommandSender sender) {
         try {
-            // Recargar config.yml
-            plugin.reloadConfig();
-
-            // Recargar todos los managers
             plugin.reloadManagers();
+            sender.sendMessage(ChatColor.GREEN + "Configuration reloaded successfully.");
 
-            sender.sendMessage(ChatColor.GREEN + "Configuración recargada correctamente.");
+            // Mostrar tipo de base de datos actual
+            String dbType = plugin.getConfig().getString("database.type", "sqlite");
+            sender.sendMessage(ChatColor.GRAY + "Tipo de base de datos: " + ChatColor.YELLOW + dbType.toUpperCase());
+
+            if (dbType.equalsIgnoreCase("mysql")) {
+                // Mostrar configuraciones de MySQL
+                sender.sendMessage(ChatColor.GRAY + "Configuración MySQL:");
+                sender.sendMessage(ChatColor.GRAY + "- Host: " + ChatColor.YELLOW +
+                        plugin.getConfig().getString("database.mysql.host"));
+                sender.sendMessage(ChatColor.GRAY + "- Base de datos: " + ChatColor.YELLOW +
+                        plugin.getConfig().getString("database.mysql.database"));
+                sender.sendMessage(ChatColor.GRAY + "- SSL: " + ChatColor.YELLOW +
+                        plugin.getConfig().getBoolean("database.mysql.advanced.useSSL"));
+            }
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Error al recargar la configuración: " + e.getMessage());
+            plugin.getLogger().severe("Error durante la recarga: " + e.getMessage());
             e.printStackTrace();
         }
     }

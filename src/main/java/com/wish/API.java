@@ -86,12 +86,21 @@ public class API extends JavaPlugin implements Listener {
 
 
     public void reloadManagers() {
-        // Detener servicios antes de recargar
-        if (databaseManager != null) databaseManager.shutdown();
-        if (pingManager != null) pingManager.stopPingCheck();
-        if (pingCompensationManager != null) pingCompensationManager.shutdown();
+        // Recargar configuración primero
+        reloadConfig();
 
-        // Reinicializar managers
+        // Detener servicios antes de recargar
+        if (databaseManager != null) {
+            databaseManager.reload(); // Usar reload en lugar de shutdown
+        }
+        if (pingManager != null) {
+            pingManager.stopPingCheck();
+        }
+        if (pingCompensationManager != null) {
+            pingCompensationManager.shutdown();
+        }
+
+        // Reinicializar otros managers
         initializeManagers();
 
         // Notificar a los listeners registrados

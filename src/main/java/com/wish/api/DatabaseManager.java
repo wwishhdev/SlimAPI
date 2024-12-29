@@ -87,6 +87,12 @@ public class DatabaseManager {
         }
     }
 
+    public void reload() {
+        connection.reload();
+        initializeDatabase();
+        plugin.getLogger().info("Base de datos reconfigurada correctamente");
+    }
+
     public boolean updateAlertsStatus(UUID playerUUID, boolean enabled) {
         try (Connection conn = connection.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(
