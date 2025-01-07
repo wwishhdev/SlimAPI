@@ -39,7 +39,7 @@ public class DatabaseConnection {
         } else {
             File dataFolder = plugin.getDataFolder();
             if (!dataFolder.exists() && !dataFolder.mkdir()) {
-                plugin.getLogger().severe("No se pudo crear el directorio de la base de datos");
+                plugin.getLogger().severe("Failed to create database directory");
                 return;
             }
             this.connectionUrl = "jdbc:sqlite:" + new File(dataFolder, "database.db");
@@ -75,9 +75,9 @@ public class DatabaseConnection {
             try {
                 connection.close();
                 connection = null;
-                plugin.getLogger().info("Conexión a la base de datos cerrada correctamente");
+                plugin.getLogger().info("Database connection closed successfully");
             } catch (SQLException e) {
-                plugin.getLogger().severe("Error al cerrar la conexión: " + e.getMessage());
+                plugin.getLogger().severe("Error closing connection: " + e.getMessage());
             }
         }
     }

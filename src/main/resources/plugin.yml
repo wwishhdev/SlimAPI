@@ -6,20 +6,20 @@ description: API for AntiCheat check plugins
 
 commands:
   alerts:
-    description: Activa/desactiva las alertas del anticheat
+    description: Toggle anticheat alerts
     usage: /alerts
     permission: slimac.alerts
   slimapi:
-    description: Comandos administrativos del anticheat
+    description: Administrative commands for anticheat
     usage: /slimapi reload
     permission: slimac.admin
 
 permissions:
   slimac.alerts:
-    description: Permite ver las alertas del anticheat
+    description: Allows viewing anticheat alerts
     default: op
   slimac.admin:
-    description: Permite usar comandos administrativos
+    description: Allows using administrative commands
     default: op
     children:
       slimac.alerts: true

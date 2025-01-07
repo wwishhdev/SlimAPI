@@ -21,7 +21,7 @@ alerts:
 
   # Alert format configuration
   format:
-    prefix: "&c[AntiCheat]"
+    prefix: "&c[SlimAC]"
     player-name-color: "&f"
     check-name-color: "&f"
     details-color: "&7"

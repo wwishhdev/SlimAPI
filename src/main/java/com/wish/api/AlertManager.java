@@ -29,7 +29,7 @@ public class AlertManager {
                 }
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Error al cargar estados de alertas: " + e.getMessage());
+            plugin.getLogger().severe("Error loading alert states: " + e.getMessage());
         }
     }
 

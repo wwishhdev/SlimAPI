@@ -65,7 +65,7 @@ public class PingManager {
         if (plugin.getConfig().getBoolean("ping.actions.notify-staff", true)) {
             String notifyMessage = ChatColor.RED + "[AntiCheat] " +
                     ChatColor.WHITE + player.getName() +
-                    ChatColor.RED + " tiene ping alto " +
+                    ChatColor.RED + " has high ping " +
                     ChatColor.WHITE + "(" + ping + "ms)";
 
             for (Player staff : Bukkit.getOnlinePlayers()) {

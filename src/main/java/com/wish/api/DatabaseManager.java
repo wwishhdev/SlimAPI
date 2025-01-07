@@ -68,17 +68,17 @@ public class DatabaseManager {
                 );
             }
 
-            plugin.getLogger().info("Base de datos " +
+            plugin.getLogger().info("Database " +
                     (isMySQL ? "MySQL" : "SQLite") +
-                    " inicializada correctamente!");
+                    " initialized successfully!");
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al inicializar la base de datos: " + e.getMessage());
+            plugin.getLogger().severe("Error initializing database: " + e.getMessage());
             if (isMySQL) {
-                plugin.getLogger().severe("Configuración MySQL actual:");
+                plugin.getLogger().severe("Current MySQL configuration:");
                 plugin.getLogger().severe("Host: " + plugin.getConfig().getString("database.mysql.host"));
-                plugin.getLogger().severe("Puerto: " + plugin.getConfig().getInt("database.mysql.port"));
+                plugin.getLogger().severe("Port: " + plugin.getConfig().getInt("database.mysql.port"));
                 plugin.getLogger().severe("Database: " + plugin.getConfig().getString("database.mysql.database"));
-                plugin.getLogger().severe("Usuario: " + plugin.getConfig().getString("database.mysql.username"));
+                plugin.getLogger().severe("User: " + plugin.getConfig().getString("database.mysql.username"));
             }
             e.printStackTrace();
         }
@@ -94,9 +94,9 @@ public class DatabaseManager {
             // Reinicializar todo
             initialize();
 
-            plugin.getLogger().info("Base de datos reconfigurada correctamente");
+            plugin.getLogger().info("Database reconfigured successfully");
         } catch (Exception e) {
-            plugin.getLogger().severe("Error al recargar la base de datos: " + e.getMessage());
+            plugin.getLogger().severe("Error reloading database: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -117,7 +117,7 @@ public class DatabaseManager {
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al actualizar estado de alertas: " + e.getMessage());
+            plugin.getLogger().severe("Error updating alert status: " + e.getMessage());
             return false;
         }
     }
@@ -126,7 +126,7 @@ public class DatabaseManager {
         try (Connection conn = connection.getConnection()) {
             return conn != null && !conn.isClosed();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al probar la conexión: " + e.getMessage());
+            plugin.getLogger().severe("Error testing connection: " + e.getMessage());
             return false;
         }
     }
@@ -140,7 +140,7 @@ public class DatabaseManager {
             ResultSet rs = stmt.executeQuery();
             return rs.next() && rs.getBoolean("alerts_enabled");
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al obtener estado de alertas: " + e.getMessage());
+            plugin.getLogger().severe("Error getting alert status: " + e.getMessage());
             return false;
         }
     }
@@ -168,7 +168,7 @@ public class DatabaseManager {
             // Actualizar caché
             cachedViolations.merge(playerUUID, 1, Integer::sum);
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al añadir violación: " + e.getMessage());
+            plugin.getLogger().severe("Error adding violation: " + e.getMessage());
         }
     }
 
@@ -185,7 +185,7 @@ public class DatabaseManager {
                     return rs.getInt(1);
                 }
             } catch (SQLException e) {
-                plugin.getLogger().severe("Error al obtener violaciones: " + e.getMessage());
+                plugin.getLogger().severe("Error getting violations: " + e.getMessage());
             }
             return 0;
         });
@@ -202,7 +202,7 @@ public class DatabaseManager {
             // Limpiar caché
             cachedViolations.remove(playerUUID);
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al limpiar violaciones: " + e.getMessage());
+            plugin.getLogger().severe("Error clearing violations: " + e.getMessage());
         }
     }
 
@@ -224,7 +224,7 @@ public class DatabaseManager {
             }
             ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al actualizar estado de alertas: " + e.getMessage());
+            plugin.getLogger().severe("Error updating alert status: " + e.getMessage());
         }
     }
 
@@ -243,7 +243,7 @@ public class DatabaseManager {
             // Por defecto, las alertas están activadas
             return true;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error al obtener estado de alertas: " + e.getMessage());
+            plugin.getLogger().severe("Error getting alert status: " + e.getMessage());
             return true;
         }
     }
@@ -252,9 +252,9 @@ public class DatabaseManager {
         if (connection != null) {
             try {
                 connection.close();
-                plugin.getLogger().info("Conexión a la base de datos cerrada correctamente.");
+                plugin.getLogger().info("Database connection closed successfully.");
             } catch (Exception e) {
-                plugin.getLogger().warning("Error al cerrar la conexión de la base de datos: " + e.getMessage());
+                plugin.getLogger().warning("Error closing database connection: " + e.getMessage());
             }
         }
     }

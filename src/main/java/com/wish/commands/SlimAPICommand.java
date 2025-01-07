@@ -64,27 +64,27 @@ public class SlimAPICommand implements CommandExecutor, TabCompleter {
 
             // Verificar la conexión después de recargar
             if (dbManager.testConnection()) { // Cambiamos esto
-                sender.sendMessage(ChatColor.GREEN + "Configuración recargada correctamente.");
-                sender.sendMessage(ChatColor.GREEN + "Conexión a la base de datos establecida.");
+                sender.sendMessage(ChatColor.GREEN + "Configuration reloaded successfully.");
+                sender.sendMessage(ChatColor.GREEN + "Database connection established.");
 
                 String dbType = plugin.getConfig().getString("database.type", "sqlite");
-                sender.sendMessage(ChatColor.GRAY + "Tipo de base de datos: " + ChatColor.YELLOW + dbType.toUpperCase());
+                sender.sendMessage(ChatColor.GRAY + "Database type: " + ChatColor.YELLOW + dbType.toUpperCase());
 
                 if (dbType.equalsIgnoreCase("mysql")) {
-                    sender.sendMessage(ChatColor.GRAY + "Configuración MySQL:");
+                    sender.sendMessage(ChatColor.GRAY + "MySQL Configuration:");
                     sender.sendMessage(ChatColor.GRAY + "- Host: " + ChatColor.YELLOW +
                             plugin.getConfig().getString("database.mysql.host"));
-                    sender.sendMessage(ChatColor.GRAY + "- Base de datos: " + ChatColor.YELLOW +
+                    sender.sendMessage(ChatColor.GRAY + "- Database: " + ChatColor.YELLOW +
                             plugin.getConfig().getString("database.mysql.database"));
                     sender.sendMessage(ChatColor.GRAY + "- SSL: " + ChatColor.YELLOW +
                             plugin.getConfig().getBoolean("database.mysql.advanced.useSSL"));
                 }
             } else {
-                sender.sendMessage(ChatColor.RED + "Error: No se pudo establecer la conexión con la base de datos.");
+                sender.sendMessage(ChatColor.RED + "Error: Could not establish database connection.");
             }
         } catch (Exception e) {
-            sender.sendMessage(ChatColor.RED + "Error al recargar la configuración: " + e.getMessage());
-            plugin.getLogger().severe("Error durante la recarga: " + e.getMessage());
+            sender.sendMessage(ChatColor.RED + "Error reloading configuration: " + e.getMessage());
+            plugin.getLogger().severe("Error during reload: " + e.getMessage());
             e.printStackTrace();
         }
     }
