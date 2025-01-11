@@ -78,6 +78,28 @@ database:
       serverTimezone: "UTC"
 
 # ===========================================
+# Client Modification Detection
+# ===========================================
+client-detection:
+  # Enable or disable Forge client detection
+  forge:
+    enabled: true
+    # Kick message when Forge is detected (supports color codes with &)
+    kick-message: "&cForge is not allowed on this server\n&7Please use vanilla client"
+    # List of allowed Forge versions (leave empty to block all versions)
+    # Example: ["1.8.9", "1.12.2"]
+    allowed-versions: []
+
+  # Enable or disable Fabric client detection
+  fabric:
+    enabled: true
+    # Kick message when Fabric is detected (supports color codes with &)
+    kick-message: "&cFabric is not allowed on this server\n&7Please use vanilla client"
+    # List of allowed Fabric versions (leave empty to block all versions)
+    # Example: ["1.16.5", "1.19.2"]
+    allowed-versions: []
+
+# ===========================================
 # Ping Management
 # ===========================================
 ping:

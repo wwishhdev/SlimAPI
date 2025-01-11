@@ -23,3 +23,9 @@ permissions:
     default: op
     children:
       slimac.alerts: true
+  slimac.bypass.forge:
+    description: Allows bypassing Forge client detection
+    default: op
+  slimac.bypass.fabric:
+    description: Allows bypassing Fabric client detection
+    default: op

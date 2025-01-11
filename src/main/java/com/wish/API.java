@@ -18,6 +18,7 @@ public class API extends JavaPlugin implements Listener {
     private ViolationManager violationManager;
     private PingManager pingManager;
     private PingCompensationManager pingCompensationManager;
+    private ClientDetectionManager clientDetectionManager;
 
     @Override
     public void onEnable() {
@@ -46,6 +47,7 @@ public class API extends JavaPlugin implements Listener {
             this.violationManager = new ViolationManager(this);
             this.pingManager = new PingManager(this);
             this.pingCompensationManager = new PingCompensationManager(this);
+            this.clientDetectionManager = new ClientDetectionManager(this);
 
             // Registrar eventos
             getServer().getPluginManager().registerEvents(this, this);
@@ -99,6 +101,9 @@ public class API extends JavaPlugin implements Listener {
         if (pingCompensationManager != null) {
             pingCompensationManager.shutdown();
         }
+        if (clientDetectionManager != null) {
+            clientDetectionManager.reload();
+        }
 
         // Reinicializar otros managers
         initializeManagers();
@@ -114,6 +119,8 @@ public class API extends JavaPlugin implements Listener {
             databaseManager.clearViolations(event.getPlayer().getUniqueId());
         }
     }
+
+    public ClientDetectionManager getClientDetectionManager() { return clientDetectionManager; }
 
     public PingCompensationManager getPingCompensationManager() {
         return pingCompensationManager;
